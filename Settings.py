@@ -8,7 +8,7 @@ class Settings():
 		self.screen_color=(230,230,230)
 
 		self.speed_ship_factor = 5
-		self.ship_limit = 3
+		self.ship_limit = 2
 		#Bullet Settings
 		self.bullet_speed_factor = 10
 		self.df = 5
@@ -16,7 +16,10 @@ class Settings():
 		self.bullet_color = 60,60,60
 		self.bullets_allow = 5
 		self.Difficulty = 1
-		self.Max_allians = 30
+		self.Max_allians = 5
+
+		self.ScoreA_pos = "left"
+		self.ScoreP_pos = "right"
 	def screen_para(self):
 		return ( self.sreen_width,self.screen_hight)
 
