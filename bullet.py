@@ -11,7 +11,7 @@ class Bullet(Sprite):
 		super(Bullet,self).__init__()
 		self.screen = screen
 
-		self.rect = pygame.Rect(0,0,Settings.df,Settings.bullet_height)
+		self.rect = pygame.Rect(0,0,Settings.width,Settings.bullet_height)
 		self.rect.centerx = ship.rect.centerx
 		self.rect.top = ship.rect.top
 
@@ -22,8 +22,8 @@ class Bullet(Sprite):
 
 	def update_bullet(self):
 		self.y -= self.speed_factor
-
 		self.rect.y=self.y
+		
 
 	def creat_bullet(self):
 		

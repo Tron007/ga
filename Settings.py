@@ -6,20 +6,22 @@ class Settings():
 		self.sreen_width=1600
 		self.screen_hight=1200
 		self.screen_color=(230,230,230)
+		self.Difficulty = 1
 
-		self.speed_ship_factor = 5
+		self.speed_ship_factor = 4 +self.Difficulty
 		self.ship_limit = 2
 		#Bullet Settings
-		self.bullet_speed_factor = 10
-		self.df = 5
+		self.bullet_speed_factor = 10 +(self.Difficulty/2)
+		self.width = 1000
 		self.bullet_height = 30
 		self.bullet_color = 60,60,60
 		self.bullets_allow = 5
-		self.Difficulty = 1
+		
 		self.Max_allians = 5
 
 		self.ScoreA_pos = "left"
 		self.ScoreP_pos = "right"
+		self.ScoreH_pos = "mid"
 	def screen_para(self):
 		return ( self.sreen_width,self.screen_hight)
 
@@ -74,7 +76,7 @@ class Allian(Sprite):
 
 		self.Difficulty = self.Settings.Difficulty
 
-		self.speed = randint(self.Difficulty,2*self.Difficulty)
+		self.speed = randint(self.Difficulty,1*self.Difficulty)
 		self.direction = 1
 		self.drop_speed = 5
 
@@ -94,7 +96,7 @@ class Allian(Sprite):
 
 	def move_foward(self):
 		#print(abs(self.speed))
-		self.rect.y+=self.Difficulty*100
+		self.rect.y+=self.Difficulty*10
 
 	def check_edges(self):
 		screen_rect = self.screen.get_rect()

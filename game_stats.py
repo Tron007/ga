@@ -9,6 +9,7 @@ class GameStats():
 
 	 	self.ship_left = 0 
 	 	self.points = 0 
+	 	self.hight_score = 0
 	 def reset_stats(self):
 	 	self.ship_left = self.ai_settings.ship_limit
 
@@ -40,7 +41,7 @@ class Button():
 		self.screen.blit(self.msg_image, self.msg_image_rect)
 
 class Scoreboard():
-	 def __init__(self,ai_settings,screen,stats):
+	def __init__(self,ai_settings,screen,stats):
 
 	 	self.screen =screen
 	 	self.screen_rect = screen.get_rect()
@@ -55,18 +56,32 @@ class Scoreboard():
 	 	#prep_score(ai_settings.ScoreP_pos,self.stats.points)
 
 
-	 def prep_score(self,position,value):
-	 	score_str = str(value)
+	def prep_score(self,position,value,qwe=0):
+	 	print(qwe)
+	 	score_str=int(value)
+	 	if qwe==0:
+	 		rounded_score = int(round(value,-1))
+	 		score_str = "{:,}".format(rounded_score)
+	 	else:
+	 		score_str=str(value)
+
+
+
 	 	self.score_image = self.font.render(score_str,True,
 	 		self.text_color,self.ai_settings.screen_color)
 
 	 	self.score_rect = self.score_image.get_rect()
+
+
 	 	if position=="right":
 	 		self.score_rect.right=self.screen_rect.right -20
-	 	else:
+	 	elif position=="left":
 	 		self.score_rect.left=self.screen_rect.left +20
+	 	else:
+	 		self.score_rect.centerx =self.screen_rect.centerx
 
 	 	self.score_rect.top = 20
 
-	 def show_score(self):
+
+	def show_score(self):
 	 	self.screen.blit(self.score_image,self.score_rect)
