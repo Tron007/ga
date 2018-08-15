@@ -1,5 +1,7 @@
 
 import pygame.font
+from Settings import Ship_lvlimage
+from pygame.sprite import Group
 class GameStats():
 
 	 def __init__(self,ai_settings):
@@ -12,6 +14,8 @@ class GameStats():
 	 	self.hight_score = 0
 	 def reset_stats(self):
 	 	self.ship_left = self.ai_settings.ship_limit
+
+
 
 
 class Button():
@@ -57,8 +61,8 @@ class Scoreboard():
 
 
 	def prep_score(self,position,value,qwe=0):
-	 	print(qwe)
-	 	score_str=int(value)
+	 	
+	 	
 	 	if qwe==0:
 	 		rounded_score = int(round(value,-1))
 	 		score_str = "{:,}".format(rounded_score)
@@ -82,6 +86,30 @@ class Scoreboard():
 
 	 	self.score_rect.top = 20
 
+	def prep_level(self,curlvl):
+		score_str="Curent lvl: "+str(curlvl)
+		self.lvlImage = self.font.render(score_str,True,
+	 		self.text_color,self.ai_settings.screen_color)
+
+		self.lvlImage_rect = self.lvlImage.get_rect()
+		self.lvlImage_rect.right=self.screen_rect.right-20
+		self.lvlImage_rect.top = self.score_rect.bottom + 10
+
+	def prep_lifes(self):
+		self.ships= Group()
+		for ship_numer in range(self.ai_settings.ship_limit):
+			ship = Ship_lvlimage()
+			ship.rect.x = 10 + ship_numer *ship.rect.width
+			ship.rect.y = self.screen_rect.y+ship.rect.height+10
+			self.ships.add(ship) 
 
 	def show_score(self):
 	 	self.screen.blit(self.score_image,self.score_rect)
+
+	def show_lvl(self):
+	 	self.screen.blit(self.lvlImage,self.lvlImage_rect)
+
+	def show_life(self):
+	 	for ship in self.ships:
+	 		self.screen.blit(ship.image,ship.rect)
+

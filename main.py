@@ -67,8 +67,9 @@ def ship_hit(Settings,bullets,allians,screen,ship,stats):
 		allians.empty()
 		bullets.empty()
 		ship.center()
-		#Settings.ship_limit-=1
+		Settings.reset_stats()
 		stats.game_active = False
+
 	
 def update_Allians(Settings,bullets,allians,screen,ship,stats):
 
@@ -87,7 +88,7 @@ def update_Allians(Settings,bullets,allians,screen,ship,stats):
 		elif allians.sprites()[allian].check_edges():
 			allians.sprites()[allian].direction*=-1
 			RandAli=randint(0,len(allians)-1)
-			print("Random ali: " ,RandAli)
+			#print("Random ali: " ,RandAli)
 			allians.sprites()[RandAli].move_foward()
 			#allians.sprites()[randint(0,len(allians)-1)].move_foward()
 			#allians.sprites()[randint(0,len(allians)-1)].Difficulty+=1
@@ -109,7 +110,7 @@ def update_bullets(Settings,bullets,allians,screen,stats):
 	collisions = pygame.sprite.groupcollide(bullets,allians,True,True)
 	if collisions:
 		refill_fleat(Settings,screen,allians)	
-		print("hit")
+		#print("hit")
 		for alli in collisions.values():
 			stats.points+=sum([x.speed*20*Settings.Difficulty for x in alli])
 			#stats.points+=alli.speed*20
@@ -118,7 +119,7 @@ def update_bullets(Settings,bullets,allians,screen,stats):
 
 def fire_bullet(my_settings,screen,ourShip,bullets):
 	if len(bullets)< my_settings.bullets_allow:
-		print("fire")
+		#print("fire")
 		new_bullet = Bullet(my_settings,screen,ourShip)
 		bullets.add(new_bullet)
 
@@ -174,9 +175,7 @@ def Keyup(event,ourShip,screen):
 def restart_game(stats,my_settings,screen,allians,ourShip):
 
 	stats.game_active=True
-	my_settings.ship_limit = 2
-	my_settings.Difficulty = 1
-	my_settings.Max_allians = 5
+	my_settings.reset_stats()
 	stats.points = 0
 	creat_fleet(my_settings,screen,allians,stats)	
 	ourShip.center()
@@ -211,7 +210,7 @@ def Update_ship(ourShip,my_settings,stats,allians,screen,bullets):
 	if len(allians)<=0:
 		allians.empty()
 		bullets.empty()
-		my_settings.Difficulty+=1
+		my_settings.update_stats()
 		creat_fleet(my_settings,screen,allians,stats)	
 		ourShip.center()
 		sleep(1)
@@ -233,10 +232,10 @@ def run_game():
 	
 
 	button1= Button(my_settings,screen,"Play")
-	ourShip = Ship(screen)
+	ourShip = Ship(screen,my_settings)
 
 
-	sb1 = Scoreboard(my_settings,screen,stats)	
+	sb1 = Scoreboard(my_settings,screen,stats)	 
 	sb2 = Scoreboard(my_settings,screen,stats)
 	sb3 = Scoreboard(my_settings,screen,stats)
 	
@@ -254,10 +253,14 @@ def run_game():
 			#score prep and showing
 			
 			sb1.prep_score(my_settings.ScoreA_pos,stats.ship_left,1)
+			sb1.prep_lifes()
 			sb2.prep_score(my_settings.ScoreP_pos,stats.points)
-			sb3.prep_score(my_settings.ScoreH_pos,stats.hight_score)			
+			sb2.prep_level(my_settings.Difficulty)
+			sb3.prep_score(my_settings.ScoreH_pos,stats.hight_score)
+			sb1.show_life()
 			sb1.show_score()
 			sb2.show_score()
+			sb2.show_lvl()
 			sb3.show_score()
 
 			

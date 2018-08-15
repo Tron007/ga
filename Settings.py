@@ -3,33 +3,60 @@ from pygame.sprite import Sprite
 from random import randint
 class Settings():
 	def __init__(self):
+		#Screen settings
 		self.sreen_width=1600
 		self.screen_hight=1200
 		self.screen_color=(230,230,230)
-		self.Difficulty = 1
-
-		self.speed_ship_factor = 4 +self.Difficulty
-		self.ship_limit = 2
-		#Bullet Settings
-		self.bullet_speed_factor = 10 +(self.Difficulty/2)
-		self.width = 1000
+		
+		#Bullet Settings		
+		self.width = 1200
 		self.bullet_height = 30
 		self.bullet_color = 60,60,60
 		self.bullets_allow = 5
 		
-		self.Max_allians = 5
-
+		#Possition of information
 		self.ScoreA_pos = "left"
 		self.ScoreP_pos = "right"
 		self.ScoreH_pos = "mid"
+
+		#reset information about lvl and game
+		self.reset_stats()
+
 	def screen_para(self):
 		return ( self.sreen_width,self.screen_hight)
 
+	def reset_stats(self):
+		self.Difficulty = 1
+		self.speed_ship_factor = 4
+		self.ship_limit = 2
+		self.bullet_speed_factor = 10 
+		self.Max_allians = 5
+
+	def update_stats(self):
+		self.Difficulty+=1
+
+		self.speed_ship_factor += self.Difficulty
+		self.bullet_speed_factor+=self.Difficulty
+		self.Max_allians = 5*self.Difficulty
+
+class Ship_lvlimage(Sprite):
+	def __init__(self,):
+	 	super(Ship_lvlimage,self).__init__()
+
+	 	self.image=pygame.image.load('ship.png')
+	 	self.image=pygame.transform.scale(self.image, (50, 80))
+	 	self.rect = self.image.get_rect()
+
+
+	def blitme(self):
+		self.screen.blit(self.image,self.rect)
+
+
 class Ship:
 
-	def __init__(self,screen):
+	def __init__(self,screen,Settings):
 
-		self.all_settings = Settings()
+		self.all_settings = Settings
 		self.screen=screen
 
 		self.image=pygame.image.load('ship.png')
@@ -50,13 +77,18 @@ class Ship:
 		self.move_down = False 
 
 	def update_position(self):
-		if self.move_right:			
+		#Get sceen possition  to dont allow to more outside of the screen
+		screen_R = self.screen_rect.right
+		screen_L = self.screen_rect.left
+		screen_B = self.screen_rect.bottom
+
+		if self.move_right and self.rect.right<= screen_R:			
 				self.rect.centerx +=self.all_settings.speed_ship_factor
-		if self.move_left:	
+		if self.move_left and self.rect.left >= screen_L:	
 				self.rect.centerx -=self.all_settings.speed_ship_factor
-		if self.move_up:	
+		if self.move_up :	
 				self.rect.centery -=self.all_settings.speed_ship_factor
-		if self.move_down:	
+		if self.move_down and self.rect.bottom <= screen_B:	
 				self.rect.centery +=self.all_settings.speed_ship_factor
 
 	def blitme(self):
@@ -85,7 +117,7 @@ class Allian(Sprite):
 		self.image=pygame.transform.scale(self.image, (100, 160))
 		self.rect = self.image.get_rect()
 
-		print(self.rect.width,self.rect.height)
+		#print(self.rect.width,self.rect.height)
 		self.rect.x = self.rect.width
 		self.rect.y = self.rect.height
 
@@ -95,8 +127,7 @@ class Allian(Sprite):
 			self.screen.blit(self.image,self.rect)
 
 	def move_foward(self):
-		#print(abs(self.speed))
-		self.rect.y+=self.Difficulty*10
+		self.rect.y+=self.Difficulty*5
 
 	def check_edges(self):
 		screen_rect = self.screen.get_rect()
