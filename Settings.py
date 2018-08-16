@@ -9,10 +9,15 @@ class Settings():
 		self.screen_color=(230,230,230)
 		
 		#Bullet Settings		
-		self.width = 1200
+		self.width = 1000
 		self.bullet_height = 30
 		self.bullet_color = 60,60,60
 		self.bullets_allow = 5
+
+		#Bullet Settings		
+		self.rocket_allow = 5
+		self.abv_rocket = 1
+
 		
 		#Possition of information
 		self.ScoreA_pos = "left"

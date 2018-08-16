@@ -9,7 +9,8 @@ from bullet import Bullet
 from game_stats import GameStats
 from game_stats import Button
 from game_stats import Scoreboard
-
+from bullet import Rocket
+from bullet import creat_destr
 import json
 
 from random import randint
@@ -97,7 +98,8 @@ def update_Allians(Settings,bullets,allians,screen,ship,stats):
 		allians.sprites()[allian].update()
 		
 
-def update_bullets(Settings,bullets,allians,screen,stats):
+def update_bullets(Settings,bullets,allians,screen,stats,rockets,dt):
+
 	for bullet in bullets.sprites():
 		bullet.creat_bullet()
 		bullet.update_bullet()
@@ -106,8 +108,17 @@ def update_bullets(Settings,bullets,allians,screen,stats):
 		if bullet.rect.bottom <=0:
 			bullets.remove(bullet)
 
+	for rocket in rockets.copy():
+		rocket.creat_rocket()
+		rocket.update_rocket(dt)
+		if rocket.rect.bottom <=0:
+			rockets.remove(rocket)	
+
+	detotaion = Group()
+			
 	#check for collisions and delete ojects !!!			
 	collisions = pygame.sprite.groupcollide(bullets,allians,True,True)
+	rock_cllision = pygame.sprite.groupcollide(rockets,allians,True,True)
 	if collisions:
 		refill_fleat(Settings,screen,allians)	
 		#print("hit")
@@ -116,6 +127,22 @@ def update_bullets(Settings,bullets,allians,screen,stats):
 			#stats.points+=alli.speed*20
 		#Settings.Difficulty+=1
 			#print("Bullets ",len(bullets))
+	if rock_cllision:
+		de = creat_destr(screen,rocket)
+		detotaion.add(de) 
+		a1= pygame.sprite.groupcollide(detotaion,allians,True,True)
+		for roc in rock_cllision.values():
+			refill_fleat(Settings,screen,allians)	
+			stats.points+=sum([x.speed*20*Settings.Difficulty for x in roc])
+		for roc in a1.values():
+			refill_fleat(Settings,screen,allians)	
+			stats.points+=sum([x.speed*20*Settings.Difficulty for x in roc])
+
+	if stats.points//(500*Settings.abv_rocket* Settings.Difficulty):
+		 Settings.abv_rocket+=1
+		 Settings.rocket_allow+=1
+		 print( Settings.rocket_allow)
+
 
 def fire_bullet(my_settings,screen,ourShip,bullets):
 	if len(bullets)< my_settings.bullets_allow:
@@ -123,7 +150,16 @@ def fire_bullet(my_settings,screen,ourShip,bullets):
 		new_bullet = Bullet(my_settings,screen,ourShip)
 		bullets.add(new_bullet)
 
-def Keydown(event,ourShip,bullets,screen,my_settings,stats,allians):
+def fire_rocket(my_settings,screen,ourShip,rockets):
+
+	if len(rockets)< my_settings.rocket_allow:
+		print("rockets")
+		new_rocket = Rocket(my_settings,screen,ourShip)
+		rockets.add(new_rocket)
+		my_settings.rocket_allow-=1
+
+def Keydown(event,ourShip,bullets,screen,
+	my_settings,stats,allians,rockets):
 	#print(ourShip.rect.x,ourShip.rect.y)
 	if event.key == pygame.K_RIGHT:
 		ourShip.move_right = True		
@@ -156,6 +192,8 @@ def Keydown(event,ourShip,bullets,screen,my_settings,stats,allians):
 
 	elif event.key == pygame.K_SPACE:
 		fire_bullet(my_settings,screen,ourShip,bullets)
+	elif event.key == pygame.K_w:
+		fire_rocket(my_settings,screen,ourShip,rockets)
 	elif event.key == pygame.K_q:
 		save_score(stats)
 		sys.exit()
@@ -180,7 +218,7 @@ def restart_game(stats,my_settings,screen,allians,ourShip):
 	creat_fleet(my_settings,screen,allians,stats)	
 	ourShip.center()
 
-def Game_event(ourShip,bullets,screen,my_settings,button1,stats,allians):
+def Game_event(ourShip,bullets,screen,my_settings,button1,stats,allians,rockets):
 	
 
 	pygame.mouse.set_visible(not stats.game_active)
@@ -190,7 +228,7 @@ def Game_event(ourShip,bullets,screen,my_settings,button1,stats,allians):
 			sys.exit()
 
 		elif event.type == pygame.KEYDOWN:
-			Keydown(event,ourShip,bullets,screen,my_settings,stats,allians)	
+			Keydown(event,ourShip,bullets,screen,my_settings,stats,allians,rockets)	
 		elif event.type == pygame.KEYUP:
 			Keyup(event,ourShip,screen)		
 		elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -214,10 +252,27 @@ def Update_ship(ourShip,my_settings,stats,allians,screen,bullets):
 		creat_fleet(my_settings,screen,allians,stats)	
 		ourShip.center()
 		sleep(1)
-		
+
+def update_screen_information(my_settings,
+	stats,sb1):
+
+	sb1.prep_score(my_settings.ScoreA_pos,stats.ship_left,1)
+	sb1.prep_lifes()
+	sb1.show_life()
+	sb1.show_score()
+
+	sb1.prep_score(my_settings.ScoreP_pos,stats.points)
+	sb1.prep_level(my_settings.Difficulty)
+	sb1.show_score()
+	sb1.show_lvl()
+
+	sb1.prep_score(my_settings.ScoreH_pos,stats.hight_score)				
+	sb1.show_score()
+	
 
 def run_game():
 	bullets = Group()
+	rockets = Group()
 	my_settings=Settings()
 	stats = GameStats(my_settings)
 	
@@ -235,10 +290,8 @@ def run_game():
 	ourShip = Ship(screen,my_settings)
 
 
-	sb1 = Scoreboard(my_settings,screen,stats)	 
-	sb2 = Scoreboard(my_settings,screen,stats)
-	sb3 = Scoreboard(my_settings,screen,stats)
-	
+	scoreboard_screen = Scoreboard(my_settings,screen,stats)
+	#Open highest score if exist	 
 	try:
 		with open(Score_file) as f_obj:
 			stats.hight_score = json.load(f_obj)
@@ -248,24 +301,14 @@ def run_game():
 			
 	while True:
 		screen.fill(bg_color)
-		Game_event(ourShip,bullets,screen,my_settings,button1,stats,allians)
+		Game_event(ourShip,bullets,screen,my_settings,button1,stats,allians,rockets)
 		if stats.game_active:
 			#score prep and showing
 			
-			sb1.prep_score(my_settings.ScoreA_pos,stats.ship_left,1)
-			sb1.prep_lifes()
-			sb2.prep_score(my_settings.ScoreP_pos,stats.points)
-			sb2.prep_level(my_settings.Difficulty)
-			sb3.prep_score(my_settings.ScoreH_pos,stats.hight_score)
-			sb1.show_life()
-			sb1.show_score()
-			sb2.show_score()
-			sb2.show_lvl()
-			sb3.show_score()
-
 			
+			update_screen_information(my_settings,stats,scoreboard_screen)
 			Update_ship(ourShip,my_settings,stats,allians,screen,bullets)			
-			update_bullets(my_settings,bullets,allians,screen,stats)			
+			update_bullets(my_settings,bullets,allians,screen,stats,rockets,dt)			
 			update_Allians(my_settings,bullets,allians,screen,ourShip,stats)
 			
 		else:
@@ -276,5 +319,6 @@ def run_game():
 			#allian.update()
 
 		pygame.display.flip()
-		clock.tick(80)
+		dt = clock.tick(80)
+		#print(df)
 run_game()
